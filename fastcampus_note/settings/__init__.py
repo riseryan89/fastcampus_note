@@ -1,0 +1,1 @@
+from fastcampus_note.settings.settings import *
