@@ -88,8 +88,16 @@ WSGI_APPLICATION = "fastcampus_note.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": "note_hub",
+        "ENGINE": "django.db.backends.mysql",
+        "USER": "note_app",
+        "PASSWORD": "note_hub_app_1",  # 계정 비밀번호
+        "HOST": "127.0.0.1",  # 데이테베이스 주소(IP)
+        "PORT": "3306",  # 데이터베이스 포트(보통은 3306)
+        "OPTIONS": {
+            "autocommit": True,
+            "charset": "utf8mb4",
+        },
     }
 }
 
