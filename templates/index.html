@@ -1,25 +1,35 @@
 {% extends 'base.html' %}
 
 {% block title %}
-{{title}}
+    {{title}}
 {% endblock %}
+
 {% block head %}
 <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
 {% endblock %}
 
 {% block body %}
 <body>
-    {% include 'include.html' %}
-    Hello Django!
-    <p>{{user_id}}</p>
-    <p>{{date_joined|date:"Y-m-d"}}</p>
-    <p>{{category_list|first}}</p>
-    {%for i in category_list%}
-    <p style="color: red;">{{i|add:19}}</p>
-    {%endfor%}
-    <p>{{msg|upper}}</p>
-    <p>{{msg|cut:"World"}}</p>
-    <p>{{note|default:"No Note"}}</p>
-    <p>{{price|floatformat:"-3g"}}</p>
+  <div class="container mt-5" id="app">
+    <div class="alert alert-primary" role="alert">
+        [[ message ]]
+    </div>
+    <button class="btn btn-primary" @click="changeMessage">Change message</button>
+  </div>
+
 </body>
+  <script>
+    var app = new Vue({
+      el: '#app',
+      delimiters: ['[[', ']]'],
+      data: {
+        message: 'Hello Vue.js & Bootstrap!'
+      },
+      methods: {
+        changeMessage: function() {
+          this.message = '이 메세지는 변경되었습니다..'
+        }
+      }
+    });
+  </script>
 {% endblock %}
