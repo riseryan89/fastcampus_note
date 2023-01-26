@@ -1,10 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Test File</title>
-</head>
+{% extends 'base.html' %}
+
+{% block title %}
+{{title}}
+{% endblock %}
+
+{% block body %}
 <body>
+    {% include 'include.html' %}
     Hello Django!
 </body>
-</html>
+{% endblock %}
