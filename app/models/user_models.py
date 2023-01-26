@@ -11,10 +11,10 @@ from app.models.abstract_models import BaseModel
 
 
 class UserDetail(BaseModel):
-    memo_count = models.OneToOneField(User, related_name="user_detail", on_delete=models.CASCADE)
+    user_detail = models.OneToOneField(User, related_name="user_detail", on_delete=models.CASCADE)
     last_ip = IPAddressField(null=True)  # models.GenericIPAddressField
 
 
 # class User(AbstractUser):
-#     memo_count = models.OneToOneField(User, related_name="user_detail", on_delete=models.CASCADE)
+#     user_detail = models.OneToOneField(User, related_name="user_detail", on_delete=models.CASCADE)
 #     last_ip = IPAddressField(null=True)
