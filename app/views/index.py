@@ -12,6 +12,8 @@ def index(request):
         price=1000,
         note=None,
         msg="Hello World",
+        java="Java",
+        python="Python",
     )
 
     return render(request, "index.html", rendering_info)
