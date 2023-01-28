@@ -10,85 +10,293 @@
 
 {% block body %}
 <body>
-    {% include 'include.html' %}
-    {% if user.is_authenticated %}
-        <h1>Hi {{user.username}}</h1>
-    {% else %}
-        <h1>Hi Guest</h1>
-    {% endif %}
-    <p>{{ user_id }}</p>
-    <p>{{ user_id }}</p>
-    <p>{{ date_joined|date:"Y-m-d" }}</p>
-    <p>{{ category_list|first }}</p>
-    {% for i in category_list %}
-    <p style="color: red;">{{i|add:19}}</p>
-    {% endfor %}
-    <p>{{ msg|upper }}</p>
-    <p>{{ msg|cut:"World" }}</p>
-    <p>{{ note|default:"No Note" }}</p>
-    <p>{{ price|floatformat:"-3g" }}</p>
-    <p></p>
-    <p>{{ java }} {{ java|word_changer }}</p>
-    <p>{{ python }} {{ python|word_changer }}</p>
-
-  <div class="container mt-5" id="app">
-    <div class="alert alert-primary" role="alert">
-        [[ message ]]
+<div class="container-fluid m-0 p-0"  style="height: 95vh;" id="app">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">NOTE HUB</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <button class="btn btn-sm btn-outline-dark" type="button" data-bs-toggle="modal" data-bs-target="#newNoteModal">
+              새 노트 만들기
+            </button>
+          </li>
+        </ul>
+        <form class="d-flex">
+          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+          <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="https://picsum.photos/40" class="img-avatar" alt="..." style="border-radius: 50%;">
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <li><a class="dropdown-item" href="#">Profile</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#">Logout</a></li>
+          </ul>
+      </div>
     </div>
-    <button class="btn btn-primary" @click="changeMessage">Change message</button>
+  </nav>
 
-    <h1 class="mt-5">HTML Form</h1>
-    <form method="post">
-        {% csrf_token %}
-        <div class="form-group">
-            <label for="exampleInputEmail1">Email address</label>
-            <input type="email" class="form-control" name="email" id="exampleInputEmail1" aria-describedby="emailHelp">
-        </div>
-        <div class="form-group">
-            <label for="exampleInputPassword1">Password</label>
-            <input type="password" class="form-control" name="password" id="exampleInputPassword1">
-        </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
 
-    <h1 class="mt-5">HTML Form (Dj Form)</h1>
-    {% if not success %}
-    <form method="post">
-        {% csrf_token %}
-        <div class="form-group">
-            <label for="{{ form.email.id_for_label }}">Email address</label>
-            {{ form.email }}
-            {% if form.email.errors %}
-                <div class="text-danger">{{ form.email.errors }}</div>
-            {% endif %}
+  <div class="row h-100">
+    <div class="col-lg-2 bg-light">
+        <div class="flex-shrink-0 p-3 text-dark ">
+          <a class="align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
+            <span class="fs-6">카테고리</span>
+          </a>
+          <hr>
+          <ul class="nav nav-pills flex-column mb-auto">
+            <li class="nav-item">
+              <span class="nav-link side__nav__link active" style="cursor:pointer;"  @click="addActive">
+                전체
+              </span>
+            </li>
+            <li class="nav-item" v-for="category in categories">
+              <span class="nav-link side__nav__link" style="cursor:pointer;" @click="addActive">
+                [[category.name]]
+              </span>
+            </li>
+            <li>
+              <button class="nav-link" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
+                카테고리 생성
+              </button>
+            </li>
+          </ul>
         </div>
-        <div class="form-group">
-            <label for="{{ form.password.id_for_label }}">Password</label>
-            {{ form.password }}
-            {% if form.password.errors %}
-                <div class="text-danger">{{ form.password.errors }}</div>
-            {% endif %}
+      </div>
+      <div class="col">
+        <div class=" py-2">
+          <div class="row" id="noteRow">
+
+          </div>
         </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
-    {% else %}
-      <h2>회원가입 완료</h2>
-    {% endif %}
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="createCategoryModal" tabindex="-1" aria-labelledby="createCategoryModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="createCategoryModalLabel">카테고리 생성</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="categoryName" class="form-label">새로운 카테고리 이름</label>
+              <input type="text" class="form-control" id="categoryName" placeholder="직장 업무" v-model="newCategoryName">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" >취소</button>
+            <button type="button" class="btn btn-success">생성</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="newNoteModal" tabindex="-1" aria-labelledby="newNoteModal" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-3">
+          <div class="modal-header">
+            <input type="text" class="form-control" style="border: 0; font-size: 23px; font-weight: bold" v-model="newNoteTitle" placeholder="메모 제목">
+          </div>
+          <div class="modal-body">
+            <img v-if="newNoteImage != ''" :src="newNoteImages" style="width: 100%; height: auto" />
+            <div class="">
+              <div class="input-group input-group-inline">
+                <textarea class="form-control" placeholder="메모 내용" style="border: 0; height: 200px; width: 100%" v-model="newNoteContent"></textarea>
+              </div>
+              <span class="mt-2 valid-feedback">Looks good!</span>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <div class="me-auto">
+              <button class="btn btn-link text-sm font-semibold" @click="addImagesButtonClicked"><i class="bi bi-cloud-upload"></i> 이미지 첨부</button>
+              <input class="form-control d-none" type="file" id="formFile" @change="addImage">
+            </div>
+            <button type="button" class="btn btn-sm btn-neutral" data-bs-dismiss="modal" @click="addNote">저장</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="selectCategoryModal" tabindex="-1" aria-labelledby="selectCategoryModal" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-3">
+          <div class="modal-header">
+            카테고리 선택
+          </div>
+          <div class="modal-body">
+            <select class="form-select" aria-label="Default select example">
+              <option selected>카테고리 선택</option>
+              <option v-for="category in categories" :value="category.id">[[category.name]]</option>
+            </select>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-sm btn-neutral" data-bs-dismiss="modal" @click="addNote">저장</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+
+
 
 </body>
   <script>
-    var app = new Vue({
+  let vue = new Vue({
       el: '#app',
       delimiters: ['[[', ']]'],
       data: {
-        message: 'Hello Vue.js & Bootstrap!'
+          newCategoryName: '',
+          newNoteImage: '',
+          newNoteContent: '',
+          newNoteTitle: '',
+          categories: [{id: 1, name: '직장 업무', color: 'primary'}, {id: 2, name: '개인 업무', color: 'info'}],
+          masonry: null,
+          notes: [
+          {
+            "id": 2,
+            "title": "Django 앱만들기",
+            "category": {id: 1, name: '직장 업무', color: 'primary'},
+            "content": "간단한 테스트 입니다. DJANGO를 이용한 메모앱 만들기",
+            "image": ''
+          },
+          {
+            "id": 3,
+            "title": "text memo",
+            "category": null,
+            "content": "sakdfhjskjdhfkjsasakdfhjskjdhfkjsa ",
+            "image": ''
+          },
+          {
+            "id": 4,
+            "title": "text memo",
+            "category": {id: 1, name: '직장 업무', color: 'primary'},
+            "content": "sakdfhjskjdhfkjsasakdfhjskjdhfkjsa ",
+            "image": ''
+          },
+          {
+            "id": 5,
+            "title": "text memo",
+            "category": {id: 1, name: '직장 업무', color: 'primary'},
+            "content": "sakdfhjskjdhfkjsasakdfhjskjdhfkjsa ",
+            "image": ''
+          },
+          {
+            "id": 6,
+            "title": "Hello 기능;s",
+            "category": {id: 2, name: '개인 업무', color: 'info'},
+            "content": "Test 프로젝트 실습 프로젝트, Django 의 이해, Django 기능 알아보기 ",
+            "image": ''
+          }
+        ],
+        nextNoteId: 111,
+      },
+      mounted() {
+          const modal = document.getElementById("createCategoryModal");
+          modal.addEventListener("hidden.bs.modal", function(){
+            vue.newCategoryName = '';
+          });
+          this.initMasonry();
       },
       methods: {
-        changeMessage: function() {
-          this.message = '이 메세지는 변경되었습니다..'
+        addImagesButtonClicked: function () {
+          document.getElementById('formFile').click();
+        },
+        addImage: function () {
+            const fileInput = document.getElementById("formFile")
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0]
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = function () {
+                    vue.newNoteImage = reader.result;
+                };
+            }
+        },
+        addNote: function () {
+          const memoInfo = {
+              id: this.nextNoteId, title: this.newNoteTitle, content: this.newNoteContent, image: this.newNoteImage, category: null
+          };
+          const rowEle = document.getElementById("noteRow")
+          this.notes.unshift(memoInfo)
+          const elmt = document.createElement("div")
+          elmt.className = "col-sm-4 col-md-3 py-3"
+          elmt.innerHTML = this.getHtmlElement(memoInfo)
+          rowEle.appendChild(elmt)
+          this.msnry.prepended(elmt)
+          this.msnry.layout();
+          this.newNoteTitle = "";
+          this.newNoteContent = "";
+          this.newNoteImage = "";
+
+          this.nextNoteId += 1;
+        },
+        addActive: function () {
+          {# add active class to clicked elements and remove all active from all elements has nav-link class #}
+          const navLinks = document.getElementsByClassName("side__nav__link");
+          for (let i = 0; i < navLinks.length; i++) {
+            navLinks[i].addEventListener("click", function() {
+              const current = document.getElementsByClassName("active");
+              current[0].className = current[0].className.replace(" active", "");
+              this.className += " active";
+            });
+          }
+        },
+        initMasonry: function () {
+          this.msnry = new Masonry( '#noteRow', {"percentPosition": true });
+          const rowEle = document.getElementById("noteRow")
+          for(let i=0; i < this.notes.length; i++) {
+              const elmt = document.createElement("div")
+              elmt.className = "col-sm-4 col-md-3 py-3"
+              elmt.innerHTML = this.getHtmlElement(this.notes[i])
+              rowEle.appendChild(elmt)
+              this.msnry.appended(elmt)
+          }
+          this.msnry.layout();
+        },
+        getHtmlElement: function (m) {
+          return `
+            <div class="card" style="cursor: pointer">
+              <div class="${m.image === '' ? 'd-none':''}">
+                <img ${m.image === '' ? "":'src="'+m.image+'"'} alt="..." class="card-img">
+              </div>
+              <div class="card-body">
+                <!-- Title -->
+                <h4 class="mb-2">${m.title}</h4>
+                <!-- Text -->
+                <p class="text-sm text-muted mb-3">
+                  ${m.content}
+                </p>
+                <!-- Actions -->
+                <div class="mx-n1 mt-5">
+                  ${m.category !== null ? '<span class="badge bg-'+m.category.color+'">'+m.category.name+'</span>':'<span class="badge bg-secondary">미설정</span>'}
+                  <button href="#" class="btn btn-square btn-sm btn-light rounded-circle mx-1" data-bs-toggle="modal" data-bs-target="#selectCategoryModal">
+                    <span class="svg-icon">
+                      <i class="bi bi-archive"></i>
+                    </span>
+                  </button>
+                  <button href="#" class="btn btn-square btn-sm btn-light rounded-circle mx-1">
+                    <span class="svg-icon">
+                      <i class="bi bi-pen"></i>
+                    </span>
+                  </button>
+                  <button onclick="vue.removeItem(${m.id}, this)" class="btn btn-square btn-sm btn-light rounded-circle mx-1">
+                    <span class="svg-icon">
+                      <i class="bi bi-trash"></i>
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>`
         }
       }
-    });
+  });
   </script>
 {% endblock %}
