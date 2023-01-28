@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load custom_tags %}
 
 {% block title %}
 {{title}}
@@ -8,15 +9,18 @@
 <body>
     {% include 'include.html' %}
     Hello Django!
-    <p>{{user_id}}</p>
-    <p>{{date_joined|date:"Y-m-d"}}</p>
-    <p>{{category_list|first}}</p>
-    {%for i in category_list%}
+    <p>{{ user_id }}</p>
+    <p>{{ date_joined|date:"Y-m-d" }}</p>
+    <p>{{ category_list|first }}</p>
+    {% for i in category_list %}
     <p style="color: red;">{{i|add:19}}</p>
-    {%endfor%}
-    <p>{{msg|upper}}</p>
-    <p>{{msg|cut:"World"}}</p>
-    <p>{{note|default:"No Note"}}</p>
-    <p>{{price|floatformat:"-3g"}}</p>
+    {% endfor %}
+    <p>{{ msg|upper }}</p>
+    <p>{{ msg|cut:"World" }}</p>
+    <p>{{ note|default:"No Note" }}</p>
+    <p>{{ price|floatformat:"-3g" }}</p>
+    <p></p>
+    <p>{{ java }} {{ java|word_changer }}</p>
+    <p>{{ python }} {{ python|word_changer }}</p>
 </body>
 {% endblock %}
