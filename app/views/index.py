@@ -1,12 +1,17 @@
 from datetime import datetime
 
 from django.contrib.auth import logout, authenticate, login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.hashers import check_password
+from django.contrib.auth.models import User
 
 from django.shortcuts import render, redirect
+from django.db.models import Q
 
 from app.forms.test_login_form import LoginForm, SignupForm
 
 
+@login_required
 def index(request):
     success = False
     if request.method == "POST":
@@ -51,3 +56,34 @@ def user_signup2(request):
         form = SignupForm()
 
     return render(request, "signup2.html", {"form": form})
+
+
+def user_login(request):
+    msg = ""
+    if request.method == "POST":
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            email_or_username = form.cleaned_data.get("email_or_username")
+            password = form.cleaned_data.get("password")
+
+            user = User.objects.filter(Q(email=email_or_username) | Q(username=email_or_username)).first()
+            if not user:
+                msg = "로그인 정보가 올바르지 않습니다.."
+            else:
+                valid_password = check_password(password, user.password)
+                if not valid_password:
+                    msg = "로그인 정보가 올바르지 않습니다.."
+                else:
+                    login(request, user)
+                    return redirect("index")
+    else:
+        if request.user.is_authenticated:
+            return redirect("index")
+        form = LoginForm()
+
+    return render(request, "login.html", {"form": form, "msg": msg})
+
+
+def user_logout(request):
+    logout(request)
+    return redirect("login")

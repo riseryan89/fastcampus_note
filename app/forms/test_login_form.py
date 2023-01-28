@@ -3,29 +3,21 @@ import re
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 
 from app.models import UserDetail
 
 
 class LoginForm(forms.Form):
-    email = forms.EmailField(
-        label="Email",
+    email_or_username = forms.CharField(
+        label="Email_USERNAME",
         widget=forms.TextInput(attrs={"class": "form-control"}),
-        error_messages={
-            "invalid": "잘못된 이메일 이잖아~~",
-        },
     )
     password = forms.CharField(widget=forms.PasswordInput(attrs={"class": "form-control"}), label="Password")
-
-    def clean(self):
-        email = self.cleaned_data.get("email")
-
-        if email.split("@")[1] == "gmail.com":
-            self.add_error("email", "Gmail은 이용할 수 없습니다.")
 
 
 class SignupForm(UserCreationForm):

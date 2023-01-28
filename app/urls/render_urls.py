@@ -6,6 +6,8 @@ from app import views as v
 
 urlpatterns = [
     path("", v.index, name="index"),
+    path("login", v.user_login, name="login"),
+    path("logout", v.user_logout, name="logout"),
     path("signup", v.user_signup, name="signup"),
     path("signup2", v.user_signup2, name="signup2"),
 ]
