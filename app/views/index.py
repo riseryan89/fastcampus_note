@@ -1,8 +1,10 @@
 from datetime import datetime
 
-from django.shortcuts import render
+from django.contrib.auth import logout, authenticate, login
 
-from app.forms.test_login_form import LoginForm
+from django.shortcuts import render, redirect
+
+from app.forms.test_login_form import LoginForm, SignupForm
 
 
 def index(request):
@@ -32,3 +34,20 @@ def index(request):
     )
 
     return render(request, "index.html", rendering_info)
+
+
+def user_signup(request):
+    return render(request, "signup.html")
+
+
+def user_signup2(request):
+    if request.method == "POST":
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect("index")
+    else:
+        form = SignupForm()
+
+    return render(request, "signup2.html", {"form": form})

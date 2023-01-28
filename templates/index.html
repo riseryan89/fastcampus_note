@@ -11,7 +11,12 @@
 {% block body %}
 <body>
     {% include 'include.html' %}
-    Hello Django!
+    {% if user.is_authenticated %}
+        <h1>Hi {{user.username}}</h1>
+    {% else %}
+        <h1>Hi Guest</h1>
+    {% endif %}
+    <p>{{ user_id }}</p>
     <p>{{ user_id }}</p>
     <p>{{ date_joined|date:"Y-m-d" }}</p>
     <p>{{ category_list|first }}</p>

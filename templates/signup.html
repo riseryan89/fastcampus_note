@@ -1,0 +1,38 @@
+{% load static %}
+<!DOCTYPE html>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script><html>
+    <title>Signup</title>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <h1 class="text-center">회원가입</h1>
+                <form method="post">
+                    <div class="form-group mt-3">
+                        <label for="username">Username</label>
+                        <input type="text" class="form-control" id="username" placeholder="Enter username">
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" placeholder="Enter email">
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="password">Password</label>
+                        <input type="password" class="form-control" id="password" placeholder="Enter password">
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="password2">Confirm Password</label>
+                        <input type="password" class="form-control" id="password2" placeholder="Confirm password">
+                    </div>
+                  <div class="text-center mt-5">
+                    <button type="submit" class="btn btn-primary mx-auto">가입하기</button>
+                  </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
