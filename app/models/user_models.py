@@ -13,4 +13,3 @@ from app.models.abstract_models import BaseModel
 class UserDetail(BaseModel):
     user_detail = models.OneToOneField(User, related_name="user_detail", on_delete=models.CASCADE)
     last_ip = IPAddressField(null=True)  # models.GenericIPAddressField
-

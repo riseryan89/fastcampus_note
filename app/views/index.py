@@ -13,4 +13,5 @@ def index(request):
         note=None,
         msg="Hello World",
     )
+
     return render(request, "index.html", rendering_info)
