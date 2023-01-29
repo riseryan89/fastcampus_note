@@ -13,6 +13,8 @@ import os
 from pathlib import Path
 from platform import system as sys
 
+from dotenv import load_dotenv, dotenv_values
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -84,14 +86,26 @@ WSGI_APPLICATION = "fastcampus_note.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
+ENV_LOC = BASE_DIR / "fastcampus_note/settings/.env"
+ENV_LOAD = load_dotenv(ENV_LOC)
+
+if ENV_LOAD:
+    config = dotenv_values(ENV_LOC)
+    DB_HOST = config.get("DB_HOST")
+    DB_USER = config.get("DB_USER")
+    DB_PASS = config.get("DB_PASS")
+else:
+    DB_HOST = os.environ.get("DB_HOST")
+    DB_USER = os.environ.get("DB_USER")
+    DB_PASS = os.environ.get("DB_PASS")
 
 DATABASES = {
     "default": {
         "NAME": "note_hub",
         "ENGINE": "django.db.backends.mysql",
-        "USER": "note_app",
-        "PASSWORD": "note_hub_app_1",  # 계정 비밀번호
-        "HOST": "127.0.0.1",  # 데이테베이스 주소(IP)
+        "USER": DB_USER,
+        "PASSWORD": DB_PASS,  # 계정 비밀번호
+        "HOST": DB_HOST,  # 데이테베이스 주소(IP)
         "PORT": "3306",  # 데이터베이스 포트(보통은 3306)
         "OPTIONS": {
             "autocommit": True,
