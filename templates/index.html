@@ -55,12 +55,12 @@
           <hr>
           <ul class="nav nav-pills flex-column mb-auto">
             <li class="nav-item">
-              <span class="nav-link side__nav__link active" style="cursor:pointer;"  @click="addActive">
+              <span class="nav-link side__nav__link active" style="cursor:pointer;"  @click="addActive()">
                 전체
               </span>
             </li>
             <li class="nav-item" v-for="category in categories">
-              <span class="nav-link side__nav__link" style="cursor:pointer;" @click="addActive">
+              <span class="nav-link side__nav__link" style="cursor:pointer;" @click="addActive(category.id)">
                 [[category.name]]
               </span>
             </li>
@@ -96,7 +96,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" >취소</button>
-            <button type="button" class="btn btn-success">생성</button>
+            <button type="button" class="btn btn-success" @click="createCategory">생성</button>
           </div>
         </div>
       </div>
@@ -152,6 +152,21 @@
 
 </body>
   <script>
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        let cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            let cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+  }
   let vue = new Vue({
       el: '#app',
       delimiters: ['[[', ']]'],
@@ -160,45 +175,9 @@
           newNoteImage: '',
           newNoteContent: '',
           newNoteTitle: '',
-          categories: [{id: 1, name: '직장 업무', color: 'primary'}, {id: 2, name: '개인 업무', color: 'info'}],
+          categories: [],
           masonry: null,
-          notes: [
-          {
-            "id": 2,
-            "title": "Django 앱만들기",
-            "category": {id: 1, name: '직장 업무', color: 'primary'},
-            "content": "간단한 테스트 입니다. DJANGO를 이용한 메모앱 만들기",
-            "image": ''
-          },
-          {
-            "id": 3,
-            "title": "text memo",
-            "category": null,
-            "content": "sakdfhjskjdhfkjsasakdfhjskjdhfkjsa ",
-            "image": ''
-          },
-          {
-            "id": 4,
-            "title": "text memo",
-            "category": {id: 1, name: '직장 업무', color: 'primary'},
-            "content": "sakdfhjskjdhfkjsasakdfhjskjdhfkjsa ",
-            "image": ''
-          },
-          {
-            "id": 5,
-            "title": "text memo",
-            "category": {id: 1, name: '직장 업무', color: 'primary'},
-            "content": "sakdfhjskjdhfkjsasakdfhjskjdhfkjsa ",
-            "image": ''
-          },
-          {
-            "id": 6,
-            "title": "Hello 기능;s",
-            "category": {id: 2, name: '개인 업무', color: 'info'},
-            "content": "Test 프로젝트 실습 프로젝트, Django 의 이해, Django 기능 알아보기 ",
-            "image": ''
-          }
-        ],
+          notes: [],
         nextNoteId: 111,
       },
       mounted() {
@@ -206,9 +185,53 @@
           modal.addEventListener("hidden.bs.modal", function(){
             vue.newCategoryName = '';
           });
-          this.initMasonry();
+          this.getCategoryName();
+          this.getNotes();
+
       },
       methods: {
+        getColor: function(categoryId) {
+          const colorMap = {"0": "primary", "1": "info", "2": "success", "3": "warning", "4": "danger", "5": "dark"};
+          return colorMap[(categoryId % 6).toString()];
+        },
+        getCategoryName: function() {
+          axios.get('/api/categories',{}, {
+              headers: {'X-CSRFToken': getCookie('csrftoken')}
+          }).then((response) => {
+              this.categories = response.data;
+          }).catch((error) => {
+              console.log(error);
+          });
+        },
+        createCategory: function () {
+          if (this.newCategoryName === '') {
+            alert('카테고리 이름을 입력해주세요.');
+          }
+          axios.post('/api/categories', {
+            name: this.newCategoryName
+          }, {
+              headers: {'X-CSRFToken': getCookie('csrftoken')}
+          }).then((response) => {
+              this.categories.push(response.data);
+              this.newCategoryName = '';
+              // hide model in vanilla js.
+              const modal = document.getElementById("createCategoryModal");
+              const modalInstance = bootstrap.Modal.getInstance(modal);
+              modalInstance.hide();
+          }).catch((error) => {
+              console.log(error);
+          });
+        },
+        getNotes: function() {
+          axios.get('/api/notes',{}, {
+              headers: {'X-CSRFToken': getCookie('csrftoken')}
+          }).then((response) => {
+              this.notes = response.data;
+              this.initMasonry();
+          }).catch((error) => {
+              console.log(error);
+          });
+        },
         addImagesButtonClicked: function () {
           document.getElementById('formFile').click();
         },
@@ -224,24 +247,30 @@
             }
         },
         addNote: function () {
-          const memoInfo = {
-              id: this.nextNoteId, title: this.newNoteTitle, content: this.newNoteContent, image: this.newNoteImage, category: null
-          };
-          const rowEle = document.getElementById("noteRow")
-          this.notes.unshift(memoInfo)
-          const elmt = document.createElement("div")
-          elmt.className = "col-sm-4 col-md-3 py-3"
-          elmt.innerHTML = this.getHtmlElement(memoInfo)
-          rowEle.appendChild(elmt)
-          this.msnry.prepended(elmt)
-          this.msnry.layout();
-          this.newNoteTitle = "";
-          this.newNoteContent = "";
-          this.newNoteImage = "";
-
-          this.nextNoteId += 1;
+          axios.post('/api/notes', {
+            title: this.newNoteTitle,
+            content: this.newNoteContent,
+            image: this.newNoteImage,
+          }, {
+              headers: {'X-CSRFToken': getCookie('csrftoken')}
+          }).then((response) => {
+              console.log(response.data);
+              this.notes.unshift(response.data);
+              const rowEle = document.getElementById("noteRow")
+              const elmt = document.createElement("div")
+              elmt.className = "col-sm-4 col-md-3 py-3"
+              elmt.innerHTML = this.getHtmlElement(response.data)
+              rowEle.appendChild(elmt)
+              this.masonry.prepended(elmt)
+              this.masonry.layout();
+              this.newNoteTitle = '';
+              this.newNoteContent = '';
+              this.newNoteImage = '';
+          }).catch((error) => {
+              console.log(error);
+          });
         },
-        addActive: function () {
+        addActive: function (categoryId) {
           {# add active class to clicked elements and remove all active from all elements has nav-link class #}
           const navLinks = document.getElementsByClassName("side__nav__link");
           for (let i = 0; i < navLinks.length; i++) {
@@ -251,20 +280,41 @@
               this.className += " active";
             });
           }
+          this.removeAllMasonryItem();
+          if (!categoryId) {
+              this.getNotes();
+          }
+          else {
+              axios.get('/api/notes?category_id=' + categoryId,{}, {
+                  headers: {'X-CSRFToken': getCookie('csrftoken')}
+              }).then((response) => {
+                  this.notes = response.data;
+                  this.initMasonry();
+              }).catch((error) => {
+                  console.log(error);
+              });
+          }
         },
         initMasonry: function () {
-          this.msnry = new Masonry( '#noteRow', {"percentPosition": true });
+          if (this.masonry !== null) {
+            this.masonry.destroy();
+          }
+          this.masonry = new Masonry( '#noteRow', {"percentPosition": true });
           const rowEle = document.getElementById("noteRow")
           for(let i=0; i < this.notes.length; i++) {
               const elmt = document.createElement("div")
               elmt.className = "col-sm-4 col-md-3 py-3"
               elmt.innerHTML = this.getHtmlElement(this.notes[i])
               rowEle.appendChild(elmt)
-              this.msnry.appended(elmt)
+              this.masonry.appended(elmt)
           }
-          this.msnry.layout();
+          this.masonry.layout();
         },
         getHtmlElement: function (m) {
+          let color = this.getColor(m.category_id);
+          if (m.category__name === "미설정") {
+              color = "secondary";
+          }
           return `
             <div class="card" style="cursor: pointer">
               <div class="${m.image === '' ? 'd-none':''}">
@@ -279,18 +329,8 @@
                 </p>
                 <!-- Actions -->
                 <div class="mx-n1 mt-5">
-                  ${m.category !== null ? '<span class="badge bg-'+m.category.color+'">'+m.category.name+'</span>':'<span class="badge bg-secondary">미설정</span>'}
-                  <button href="#" class="btn btn-square btn-sm btn-light rounded-circle mx-1" data-bs-toggle="modal" data-bs-target="#selectCategoryModal">
-                    <span class="svg-icon">
-                      <i class="bi bi-archive"></i>
-                    </span>
-                  </button>
-                  <button href="#" class="btn btn-square btn-sm btn-light rounded-circle mx-1">
-                    <span class="svg-icon">
-                      <i class="bi bi-pen"></i>
-                    </span>
-                  </button>
-                  <button onclick="vue.removeItem(${m.id}, this)" class="btn btn-square btn-sm btn-light rounded-circle mx-1">
+                  <span class="badge bg-${color}">${m.category__name}</span>
+                  <button onclick="vue.removeItem(${m.id})" class="btn btn-square btn-sm btn-light rounded-circle mx-1">
                     <span class="svg-icon">
                       <i class="bi bi-trash"></i>
                     </span>
@@ -298,8 +338,44 @@
                 </div>
               </div>
             </div>`
-        }
-      }
+        },
+        removeItem: function (noteId) {
+          let item;
+          for(let i=0; i < this.notes.length; i++) {
+              item = this.notes[i];
+              if (item.id === noteId) {
+                  this.masonry.remove(this.getGridItem(noteId))
+                  this.masonry.layout();
+                  break;
+              }
+           }
+          const note = this.notes.find((note) => note.id === noteId);
+          const index = this.notes.indexOf(note);
+          this.notes.splice(index, 1);
+          axios.delete('/api/notes/' + noteId, {
+              headers: {'X-CSRFToken': getCookie('csrftoken')}
+          }).then((response) => {
+              console.log(response);
+          }).catch((error) => {
+              console.log(error);
+          });
+
+       },
+        getGridItem: function (noteId) {
+          const note = this.notes.find((note) => note.id === noteId);
+          const index = this.notes.indexOf(note);
+          const grid = document.getElementById("noteRow");
+          return grid.children[index];
+        },
+        removeAllMasonryItem: function () {
+          const grid = document.getElementById("noteRow");
+          while (grid.firstChild) {
+            grid.removeChild(grid.firstChild);
+          }
+        },
+     },
+
+
   });
   </script>
 {% endblock %}

@@ -18,6 +18,7 @@ class Category(BaseModel):
 class Note(BaseModel):
     title = models.CharField(max_length=256, null=False, db_index=True)
     content = models.TextField(null=True)
+    image = models.TextField(null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notes")
     category = models.ForeignKey("Category", on_delete=models.CASCADE, related_name="category")
     is_deleted = models.BooleanField(default=False)
