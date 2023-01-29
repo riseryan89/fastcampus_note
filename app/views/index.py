@@ -122,4 +122,5 @@ def send_email(request):
     from_email = "rise.ryan.lee@gmail.com"
     to_list = ["light.tosser@gmail.com"]
     send_mail(subject, message, from_email, to_list)
+    # https://aws.amazon.com/ko/premiumsupport/knowledge-center/ses-set-up-connect-smtp/
     return redirect("index")
