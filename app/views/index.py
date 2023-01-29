@@ -81,12 +81,12 @@ def user_login(request):
         if request.user.is_authenticated:
             return redirect("index")
         form = LoginForm()
-
     return render(request, "login.html", {"form": form, "msg": msg})
 
 
 def user_logout(request):
     logout(request)
+
     return redirect("login")
 
 
@@ -112,3 +112,14 @@ def cache_test2(request):
         date_joined=datetime(2022, 1, 1, 0, 0, 0),
     )
     return render(request, "cache_test2.html", {"result": result})
+
+
+def send_email(request):
+    from django.core.mail import send_mail
+
+    subject = "Hello"
+    message = "Testing the mail"
+    from_email = "rise.ryan.lee@gmail.com"
+    to_list = ["light.tosser@gmail.com"]
+    send_mail(subject, message, from_email, to_list)
+    return redirect("index")
