@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 
 from django.shortcuts import render, redirect
 from django.db.models import Q
+from django.views.decorators.cache import cache_page
 
 from app.forms.test_login_form import LoginForm, SignupForm
 
@@ -87,3 +88,27 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return redirect("login")
+
+
+def cache_test(request):
+    from django.shortcuts import render
+    from django.core.cache import cache
+
+    user = cache.get("user_query_cache")
+    if user is None:
+        user = User.objects.all()
+        cache.set("user_query_cache", user, 3600)
+        print("query executed!!!!!!")
+
+    # Perform the expensive database query here
+    return render(request, "cache_test.html", {"user": user})
+
+
+# @cache_page(3600)
+def cache_test2(request):
+    result = dict(
+        title="CacheTest",
+        user_id=1,
+        date_joined=datetime(2022, 1, 1, 0, 0, 0),
+    )
+    return render(request, "cache_test2.html", {"result": result})
