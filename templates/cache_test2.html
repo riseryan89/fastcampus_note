@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ result.title}}</title>
+</head>
+<body>
+<h1>THIS IS a CHECH TEST.</h1>
+<p>user id : {{ result.user_id }}</p>
+<p>date : {{ result.date_joined|date:"Y.m.d" }}</p>
+{% load cache %}
+{% cache 500 sidebar %}
+    .. sidebar ..sidebar
+{% endcache %}
+
+</body>
+</html>

@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <title>Signup</title>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <h1 class="text-center">로그인</h1>
+              {% if msg %}
+                <h5 class="text-center text-danger">{{ msg }}</h5>
+              {% endif %}
+                <form method="post">
+                  {% csrf_token %}
+                  <div class="form-group mt-3">
+                      <label for="{{ form.email_or_username.id_for_label }}">Username/Email</label>
+                      {{ form.email_or_username }}
+                      {% if form.email_or_username.errors %}
+                          <div class="text-danger">{{ form.email_or_username.errors }}</div>
+                      {% endif %}
+                  </div>
+                  <div class="form-group mt-3">
+                      <label for="{{ form.password.id_for_label }}">Password</label>
+                      {{ form.password }}
+                      {% if form.password.errors %}
+                          <div class="text-danger">{{ form.password.errors }}</div>
+                      {% endif %}
+                  </div>
+                  <div class="text-center mt-5">
+                    <button type="submit" class="btn btn-primary mx-auto">로그인</button>
+                    <a href="{% url 'signup2' %}"  class="btn btn-dark mx-auto">회원가입</a>
+                  </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

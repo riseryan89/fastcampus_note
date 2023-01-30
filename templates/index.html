@@ -1,10 +1,382 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Test File</title>
-</head>
+{% extends 'base.html' %}
+{% load custom_tags %}
+
+{% block title %}
+    {{title}}
+{% endblock %}
+{% block head %}
+<script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+{% endblock %}
+
+{% block body %}
 <body>
-    Hello Django!
+<div class="container-fluid m-0 p-0"  style="height: 95vh;" id="app">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">NOTE HUB</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <button class="btn btn-sm btn-outline-dark" type="button" data-bs-toggle="modal" data-bs-target="#newNoteModal">
+              새 노트 만들기
+            </button>
+          </li>
+        </ul>
+        <div class="dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="https://picsum.photos/40" class="img-avatar" alt="..." style="border-radius: 50%;">
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <li><a class="dropdown-item" href="#">Profile</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+          </ul>
+        </div>
+        <form class="d-flex">
+          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+          <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
+
+      </div>
+
+    </div>
+  </nav>
+
+
+  <div class="row h-100">
+    <div class="col-lg-2 bg-light">
+        <div class="flex-shrink-0 p-3 text-dark ">
+          <a class="align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
+            <span class="fs-6">카테고리</span>
+          </a>
+          <hr>
+          <ul class="nav nav-pills flex-column mb-auto">
+            <li class="nav-item">
+              <span class="nav-link side__nav__link active" style="cursor:pointer;"  @click="addActive()">
+                전체
+              </span>
+            </li>
+            <li class="nav-item" v-for="category in categories">
+              <span class="nav-link side__nav__link" style="cursor:pointer;" @click="addActive(category.id)">
+                [[category.name]]
+              </span>
+            </li>
+            <li>
+              <button class="nav-link" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
+                카테고리 생성
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="col">
+        <div class=" py-2">
+          <div class="row" id="noteRow">
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="createCategoryModal" tabindex="-1" aria-labelledby="createCategoryModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="createCategoryModalLabel">카테고리 생성</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="categoryName" class="form-label">새로운 카테고리 이름</label>
+              <input type="text" class="form-control" id="categoryName" placeholder="직장 업무" v-model="newCategoryName">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" >취소</button>
+            <button type="button" class="btn btn-success" @click="createCategory">생성</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="newNoteModal" tabindex="-1" aria-labelledby="newNoteModal" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-3">
+          <div class="modal-header">
+            <input type="text" class="form-control" style="border: 0; font-size: 23px; font-weight: bold" v-model="newNoteTitle" placeholder="메모 제목">
+          </div>
+          <div class="modal-body">
+            <img v-if="newNoteImage != ''" :src="newNoteImage" style="width: 100%; height: auto" />
+            <div class="">
+              <div class="input-group input-group-inline">
+                <textarea class="form-control" placeholder="메모 내용" style="border: 0; height: 200px; width: 100%" v-model="newNoteContent"></textarea>
+              </div>
+              <span class="mt-2 valid-feedback">Looks good!</span>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <div class="me-auto">
+              <button class="btn btn-link text-sm font-semibold" @click="addImagesButtonClicked"><i class="bi bi-cloud-upload"></i> 이미지 첨부</button>
+              <input class="form-control d-none" type="file" id="formFile" @change="addImage">
+            </div>
+            <button type="button" class="btn btn-sm btn-neutral" data-bs-dismiss="modal" @click="addNote">저장</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="selectCategoryModal" tabindex="-1" aria-labelledby="selectCategoryModal" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-3">
+          <div class="modal-header">
+            카테고리 선택
+          </div>
+          <div class="modal-body">
+            <select class="form-select" aria-label="Default select example">
+              <option selected>카테고리 선택</option>
+              <option v-for="category in categories" :value="category.id">[[category.name]]</option>
+            </select>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-sm btn-neutral" data-bs-dismiss="modal" @click="addNote">저장</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
 </body>
-</html>
+  <script>
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        let cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            let cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+  }
+  let vue = new Vue({
+      el: '#app',
+      delimiters: ['[[', ']]'],
+      data: {
+          newCategoryName: '',
+          newNoteImage: '',
+          newNoteContent: '',
+          newNoteTitle: '',
+          categories: [],
+          prefix: '{{ path }}',
+          masonry: null,
+          notes: [],
+        nextNoteId: 111,
+      },
+      mounted() {
+          const modal = document.getElementById("createCategoryModal");
+          modal.addEventListener("hidden.bs.modal", function(){
+            vue.newCategoryName = '';
+          });
+          this.getCategoryName();
+          this.getNotes();
+
+      },
+      methods: {
+        getColor: function(categoryId) {
+          const colorMap = {"0": "primary", "1": "info", "2": "success", "3": "warning", "4": "danger", "5": "dark"};
+          return colorMap[(categoryId % 6).toString()];
+        },
+        getCategoryName: function() {
+          axios.get(this.prefix + '/api/categories',{}, {
+              headers: {'X-CSRFToken': getCookie('csrftoken')}
+          }).then((response) => {
+              this.categories = response.data;
+          }).catch((error) => {
+              console.log(error);
+          });
+        },
+        createCategory: function () {
+          if (this.newCategoryName === '') {
+            alert('카테고리 이름을 입력해주세요.');
+          }
+          axios.post(this.prefix + '/api/categories', {
+            name: this.newCategoryName
+          }, {
+              headers: {'X-CSRFToken': getCookie('csrftoken')}
+          }).then((response) => {
+              this.categories.push(response.data);
+              this.newCategoryName = '';
+              // hide model in vanilla js.
+              const modal = document.getElementById("createCategoryModal");
+              const modalInstance = bootstrap.Modal.getInstance(modal);
+              modalInstance.hide();
+          }).catch((error) => {
+              console.log(error);
+          });
+        },
+        getNotes: function() {
+          axios.get(this.prefix + '/api/notes',{}, {
+              headers: {'X-CSRFToken': getCookie('csrftoken')}
+          }).then((response) => {
+              this.notes = response.data;
+              this.initMasonry();
+          }).catch((error) => {
+              console.log(error);
+          });
+        },
+        addImagesButtonClicked: function () {
+          document.getElementById('formFile').click();
+        },
+        addImage: function () {
+            const fileInput = document.getElementById("formFile")
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0]
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = function () {
+                    vue.newNoteImage = reader.result;
+                };
+            }
+        },
+        addNote: function () {
+          axios.post(this.prefix + '/api/notes', {
+            title: this.newNoteTitle,
+            content: this.newNoteContent,
+            image: this.newNoteImage,
+          }, {
+              headers: {'X-CSRFToken': getCookie('csrftoken')}
+          }).then((response) => {
+              console.log(response.data);
+              this.notes.unshift(response.data);
+              const rowEle = document.getElementById("noteRow")
+              const elmt = document.createElement("div")
+              elmt.className = "col-sm-4 col-md-3 py-3"
+              elmt.innerHTML = this.getHtmlElement(response.data)
+              rowEle.appendChild(elmt)
+              this.masonry.prepended(elmt)
+              this.masonry.layout();
+              this.newNoteTitle = '';
+              this.newNoteContent = '';
+              this.newNoteImage = '';
+          }).catch((error) => {
+              console.log(error);
+          });
+        },
+        addActive: function (categoryId) {
+          {# add active class to clicked elements and remove all active from all elements has nav-link class #}
+          const navLinks = document.getElementsByClassName("side__nav__link");
+          for (let i = 0; i < navLinks.length; i++) {
+            navLinks[i].addEventListener("click", function() {
+              const current = document.getElementsByClassName("active");
+              current[0].className = current[0].className.replace(" active", "");
+              this.className += " active";
+            });
+          }
+          this.removeAllMasonryItem();
+          if (!categoryId) {
+              this.getNotes();
+          }
+          else {
+              axios.get(this.prefix + '/api/notes?category_id=' + categoryId,{}, {
+                  headers: {'X-CSRFToken': getCookie('csrftoken')}
+              }).then((response) => {
+                  this.notes = response.data;
+                  this.initMasonry();
+              }).catch((error) => {
+                  console.log(error);
+              });
+          }
+        },
+        initMasonry: function () {
+          if (this.masonry !== null) {
+            this.masonry.destroy();
+          }
+          this.masonry = new Masonry( '#noteRow', {"percentPosition": true });
+          const rowEle = document.getElementById("noteRow")
+          for(let i=0; i < this.notes.length; i++) {
+              const elmt = document.createElement("div")
+              elmt.className = "col-sm-4 col-md-3 py-3"
+              elmt.innerHTML = this.getHtmlElement(this.notes[i])
+              rowEle.appendChild(elmt)
+              this.masonry.appended(elmt)
+          }
+          this.masonry.layout();
+        },
+        getHtmlElement: function (m) {
+          let color = this.getColor(m.category_id);
+          if (m.category__name === "미설정") {
+              color = "secondary";
+          }
+          return `
+            <div class="card" style="cursor: pointer">
+              <div class="${m.image === '' ? 'd-none':''}">
+                <img ${m.image === '' ? "":'src="'+m.image+'"'} alt="..." class="card-img">
+              </div>
+              <div class="card-body">
+                <!-- Title -->
+                <h4 class="mb-2">${m.title}</h4>
+                <!-- Text -->
+                <p class="text-sm text-muted mb-3">
+                  ${m.content}
+                </p>
+                <!-- Actions -->
+                <div class="mx-n1 mt-5">
+                  <span class="badge bg-${color}">${m.category__name}</span>
+                  <button onclick="vue.removeItem(${m.id})" class="btn btn-square btn-sm btn-light rounded-circle mx-1">
+                    <span class="svg-icon">
+                      <i class="bi bi-trash"></i>
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>`
+        },
+        removeItem: function (noteId) {
+          let item;
+          for(let i=0; i < this.notes.length; i++) {
+              item = this.notes[i];
+              if (item.id === noteId) {
+                  this.masonry.remove(this.getGridItem(noteId))
+                  this.masonry.layout();
+                  break;
+              }
+           }
+          const note = this.notes.find((note) => note.id === noteId);
+          const index = this.notes.indexOf(note);
+          this.notes.splice(index, 1);
+          axios.delete(this.prefix + '/api/notes/' + noteId, {
+              headers: {'X-CSRFToken': getCookie('csrftoken')}
+          }).then((response) => {
+              console.log(response);
+          }).catch((error) => {
+              console.log(error);
+          });
+
+       },
+        getGridItem: function (noteId) {
+          const note = this.notes.find((note) => note.id === noteId);
+          const index = this.notes.indexOf(note);
+          const grid = document.getElementById("noteRow");
+          return grid.children[index];
+        },
+        removeAllMasonryItem: function () {
+          const grid = document.getElementById("noteRow");
+          while (grid.firstChild) {
+            grid.removeChild(grid.firstChild);
+          }
+        },
+     },
+
+
+  });
+  </script>
+{% endblock %}
