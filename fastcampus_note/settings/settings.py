@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import os
+import platform
 from pathlib import Path
 from platform import system as sys
 
@@ -26,18 +27,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = "django-insecure-nuad^31yi$l(goh+kw$u4mjq=na_jcmtg+oh5ohs!$btph7lu2"
 
 # dev, prd, test
-ENV = os.getenv("DJANGO_ENV", "dev")
 LOCAL = True if sys().lower().startswith("darwin") or sys().lower().startswith("Windows") else False
 
 # SECURITY WARNING: don't run with debug turned on in production!
-if ENV == "prd":
+if sys().lower().startswith("darwin") or sys().lower().startswith("Windows"):
     DEBUG = False
+    ALLOWED_HOSTS = ["*"]
 else:
     DEBUG = True
-
-if ENV == "prd":
-    ALLOWED_HOSTS = ["abc@gmail.com"]
-else:
     ALLOWED_HOSTS = ["*"]
 
 
@@ -76,6 +73,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "app.context_processor.renderer",
             ],
         },
     },

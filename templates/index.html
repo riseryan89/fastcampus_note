@@ -109,7 +109,7 @@
             <input type="text" class="form-control" style="border: 0; font-size: 23px; font-weight: bold" v-model="newNoteTitle" placeholder="메모 제목">
           </div>
           <div class="modal-body">
-            <img v-if="newNoteImage != ''" :src="newNoteImages" style="width: 100%; height: auto" />
+            <img v-if="newNoteImage != ''" :src="newNoteImage" style="width: 100%; height: auto" />
             <div class="">
               <div class="input-group input-group-inline">
                 <textarea class="form-control" placeholder="메모 내용" style="border: 0; height: 200px; width: 100%" v-model="newNoteContent"></textarea>
@@ -176,6 +176,7 @@
           newNoteContent: '',
           newNoteTitle: '',
           categories: [],
+          prefix: '{{ path }}',
           masonry: null,
           notes: [],
         nextNoteId: 111,
@@ -195,7 +196,7 @@
           return colorMap[(categoryId % 6).toString()];
         },
         getCategoryName: function() {
-          axios.get('/api/categories',{}, {
+          axios.get(this.prefix + '/api/categories',{}, {
               headers: {'X-CSRFToken': getCookie('csrftoken')}
           }).then((response) => {
               this.categories = response.data;
@@ -207,7 +208,7 @@
           if (this.newCategoryName === '') {
             alert('카테고리 이름을 입력해주세요.');
           }
-          axios.post('/api/categories', {
+          axios.post(this.prefix + '/api/categories', {
             name: this.newCategoryName
           }, {
               headers: {'X-CSRFToken': getCookie('csrftoken')}
@@ -223,7 +224,7 @@
           });
         },
         getNotes: function() {
-          axios.get('/api/notes',{}, {
+          axios.get(this.prefix + '/api/notes',{}, {
               headers: {'X-CSRFToken': getCookie('csrftoken')}
           }).then((response) => {
               this.notes = response.data;
@@ -247,7 +248,7 @@
             }
         },
         addNote: function () {
-          axios.post('/api/notes', {
+          axios.post(this.prefix + '/api/notes', {
             title: this.newNoteTitle,
             content: this.newNoteContent,
             image: this.newNoteImage,
@@ -285,7 +286,7 @@
               this.getNotes();
           }
           else {
-              axios.get('/api/notes?category_id=' + categoryId,{}, {
+              axios.get(this.prefix + '/api/notes?category_id=' + categoryId,{}, {
                   headers: {'X-CSRFToken': getCookie('csrftoken')}
               }).then((response) => {
                   this.notes = response.data;
@@ -352,7 +353,7 @@
           const note = this.notes.find((note) => note.id === noteId);
           const index = this.notes.indexOf(note);
           this.notes.splice(index, 1);
-          axios.delete('/api/notes/' + noteId, {
+          axios.delete(this.prefix + '/api/notes/' + noteId, {
               headers: {'X-CSRFToken': getCookie('csrftoken')}
           }).then((response) => {
               console.log(response);
