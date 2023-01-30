@@ -13,3 +13,7 @@ from app.models.abstract_models import BaseModel
 class UserDetail(BaseModel):
     user = models.OneToOneField(User, related_name="user", on_delete=models.CASCADE)
     note_count = models.IntegerField(default=0)
+
+    def increase_count(self):
+        self.note_count += 1
+        self.save()

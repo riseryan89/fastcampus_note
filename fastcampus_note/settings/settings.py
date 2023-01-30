@@ -104,9 +104,9 @@ DATABASES = {
         "NAME": "note_hub",
         "ENGINE": "django.db.backends.mysql",
         "USER": DB_USER,
-        "PASSWORD": DB_PASS,  # 계정 비밀번호
-        "HOST": DB_HOST,  # 데이테베이스 주소(IP)
-        "PORT": "3306",  # 데이터베이스 포트(보통은 3306)
+        "PASSWORD": DB_PASS,
+        "HOST": DB_HOST,
+        "PORT": "3306",
         "OPTIONS": {
             "autocommit": True,
             "charset": "utf8mb4",
@@ -114,6 +114,12 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
