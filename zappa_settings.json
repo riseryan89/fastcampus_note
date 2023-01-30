@@ -1,0 +1,9 @@
+{
+    "production": {
+        "django_settings": "fastcampus_note.settings",
+        "profile_name": "personal",
+        "project_name": "fastcampus-note",
+        "runtime": "python3.9",
+        "s3_bucket": "fc-dj-zappa"
+    }
+}
