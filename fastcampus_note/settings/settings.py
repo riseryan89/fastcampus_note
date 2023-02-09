@@ -30,11 +30,11 @@ SECRET_KEY = "django-insecure-nuad^31yi$l(goh+kw$u4mjq=na_jcmtg+oh5ohs!$btph7lu2
 LOCAL = True if sys().lower().startswith("darwin") or sys().lower().startswith("Windows") else False
 
 # SECURITY WARNING: don't run with debug turned on in production!
-if sys().lower().startswith("darwin") or sys().lower().startswith("Windows"):
-    DEBUG = False
+if sys().lower().startswith("darwin") or sys().lower().startswith("windows"):
+    DEBUG = True
     ALLOWED_HOSTS = ["*"]
 else:
-    DEBUG = True
+    DEBUG = False
     ALLOWED_HOSTS = ["*"]
 
 
@@ -163,7 +163,10 @@ STATIC_URL = "/static/"
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-LOGIN_URL = "/login"
+if DEBUG:
+    LOGIN_URL = "/login"
+else:
+    LOGIN_URL = "/production/login"
 
 
 CACHES = {
