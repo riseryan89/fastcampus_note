@@ -3,6 +3,6 @@ from fastcampus_note.settings import DEBUG
 
 def renderer(request):
     path = ""
-    if DEBUG:
+    if not DEBUG:
         path = "/production"
     return {"path": path}
